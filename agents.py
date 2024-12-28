@@ -13,11 +13,6 @@ class ArxivSearchTool(BaseTool):
 
     def _run(self, query: str, max_results: int = 5) -> str:
         try:
-            # Set a maximum limit for articles
-            # Limit to 10 articles
-
-            # Perform the search
-            #print(f"DEBUG: Searching ArXiv for '{query}'...")
             search = arxiv.Search(
                 query=query,
                 max_results=30,
@@ -25,20 +20,18 @@ class ArxivSearchTool(BaseTool):
             )
 
 
-            # Collect and format results
             unique_titles = set()
             results = []
 
-            # Iterate over the search results
             for result in search.results():
                 title = result.title.strip()
                 if title not in unique_titles:
-                    unique_titles.add(title)  # Mark this title as seen
+                    unique_titles.add(title)  
                     paper_info = (
                         f"Title: {result.title}\n"
                         f"Authors: {', '.join(author.name for author in result.authors)}\n"
                         f"Published: {result.published}\n"
-                        f"Abstract: {result.summary[:700]}...\n"  # Limit abstract length
+                        f"Abstract: {result.summary[:700]}...\n"  
                         f"PDF: {result.pdf_url}\n"
                         + ("-" * 100)
                     )
@@ -54,11 +47,10 @@ class ArxivSearchTool(BaseTool):
 class PaperDetail(BaseModel):
     title: str
     abstract: str
-    authors: List[str]  # List of author names
-    published: str  # Publication date in 'YYYY-MM-DD' format
-    PDF: str  # Link to the PDF
-    explanation: str  # Why the paper was selected
-
+    authors: List[str] 
+    published: str  
+    PDF: str
+    explanation: str  
 class PaperInfo(BaseModel):
     papers: List[PaperDetail] 
 
@@ -176,11 +168,11 @@ retrieve_research_papers = Task(
         "2) 'papers': single list of objects, each with 'title', 'abstract', 'authors', 'published', 'PDF' fields "
         "that are most relevant to the user's query."
     ),
-    agent=arxiv_searcher,  # This task is handled by the ArXiv Researcher agent
+    agent=arxiv_searcher, 
 )
 
 
-# Define the Task for writing the JSON file
+
 select_and_explain_papers = Task(
     name="Select and Explain Papers",
     description=(
@@ -243,7 +235,7 @@ write_json_task = Task(
 )
 
 crew = Crew(
-    agents=[query_generator, arxiv_searcher, moderator, json_writer_agent],  # Include all agents
-    tasks=[generate_advanced_arxiv_query,retrieve_research_papers,select_and_explain_papers, write_json_task],  # Combined task
+    agents=[query_generator, arxiv_searcher, moderator, json_writer_agent], 
+    tasks=[generate_advanced_arxiv_query,retrieve_research_papers,select_and_explain_papers, write_json_task],  
     verbose=True
 )
