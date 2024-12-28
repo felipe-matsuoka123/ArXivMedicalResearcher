@@ -1,7 +1,8 @@
 from crewai import Agent, Task, Crew
 import arxiv
-from pydantic import PrivateAttr
+from pydantic import BaseModel
 from crewai_tools import BaseTool
+from typing import List
 
 class ArxivSearchTool(BaseTool):
     name: str = "ArXiv Search Tool"
@@ -49,7 +50,18 @@ class ArxivSearchTool(BaseTool):
             return "\n\n".join(results)
         except Exception as e:
             return f"An error occurred while searching on ArXiv: {e}"
-        
+    
+class PaperDetail(BaseModel):
+    title: str
+    abstract: str
+    authors: List[str]  # List of author names
+    published: str  # Publication date in 'YYYY-MM-DD' format
+    PDF: str  # Link to the PDF
+    explanation: str  # Why the paper was selected
+
+class PaperInfo(BaseModel):
+    papers: List[PaperDetail] 
+
 query_generator = Agent(
     role="AI Research Query Engineer",
     goal=(
@@ -172,15 +184,16 @@ retrieve_research_papers = Task(
 select_and_explain_papers = Task(
     name="Select and Explain Papers",
     description=(
-        "Review a list of research papers and select the most relevant ones based on their alignment with the user's objective ({wish}).\n\n"
-        "For each selected paper, provide the following details:\n"
+        "Review a list of research papers selected by the Senior Research Librarian (ArXiv Specialist) and "
+        "select the most relevant ones based on their alignment with the user's objective ({wish}).\n\n"
+        "For each selected paper, save the following details:\n"
         "- 'title': The title of the paper.\n"
         "- 'abstract': A brief summary of the paper.\n"
         "- 'authors': A list of the authors' names.\n"
         "- 'published': The publication date in 'YYYY-MM-DD' format.\n"
         "- 'PDF': A link to the PDF of the paper.\n"
         "- 'explanation': A specific explanation of why the paper was selected, focusing on its relevance to the user's objective ({wish}).\n\n"
-        "The paper should not be directly related to healthcare, but it has to have some applicability to healthcare."
+        "The paper does not have to be directly related to healthcare, but it has to have some applicability to healthcare."
         "In the explantion, write an insight about how the paper can be applied to healthcare even though it's main purpose was other."
         "Try to aggregate the technical aspect of the paper with the healthcare aspect."
         "Output a list of dictionaries where each dictionary contains the above fields.\n\n"
@@ -225,11 +238,10 @@ write_json_task = Task(
         
     ),
     agent=json_writer_agent,
+    output_json=PaperInfo,
     output_file="selected_papers.json"
 )
 
-
-# Define the Crew
 crew = Crew(
     agents=[query_generator, arxiv_searcher, moderator, json_writer_agent],  # Include all agents
     tasks=[generate_advanced_arxiv_query,retrieve_research_papers,select_and_explain_papers, write_json_task],  # Combined task
