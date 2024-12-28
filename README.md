@@ -21,7 +21,7 @@ This project helps researchers and enthusiasts bridge the gap between engineerin
 
 ---
 
-## **Technologies Used**
+## **Packages Used**
 - **Crew AI**: For building and managing intelligent agents.
 - **Streamlit**: For the interactive web-based interface.
 - **ArXiv API**: For accessing the latest research papers.
