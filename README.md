@@ -1,6 +1,3 @@
-Here’s a light and engaging README file for your project:
-
----
 
 # **ArXiv Medical Insights Tool**
 
