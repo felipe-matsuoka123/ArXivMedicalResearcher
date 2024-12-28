@@ -37,7 +37,7 @@ This project helps researchers and enthusiasts bridge the gap between engineerin
 ### **2. Installation**
 1. Clone the repository:
    ```bash
-   git clone https://github.com/<your-username>/arxiv-medical-insights.git
+   git clone https://github.com/felipe-matsuoka123/arxiv-medical-insights.git
    cd arxiv-medical-insights
    ```
 
